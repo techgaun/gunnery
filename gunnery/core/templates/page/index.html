@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% load core_extras %}
+{% load staticfiles %}
 
+{% block page_scripts %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="{% static "core/js/dashboard.js" %}"></script>
+{% endblock %}
 {% block content %}
     {% for application in application_list %}
         <h3>
@@ -8,6 +13,41 @@
             <a href="{{ application.get_absolute_url }}">{{ application.name }}</a>
         </h3>
         {% include "partial/execution_list_inline.html" with notitle=True list=application.executions_inline %}
+
+        {% for environment in application.environments.all %}
+		        	<div class="environment-dashboard row">
+		        		<div class="col-md-3 col-sm-6">
+		        			<h4>{{environment.name}}</h4>
+		        		</div>
+		        		<div class="col-md-3 col-sm-6">
+							<div class="panel panel-default">
+								<div class="panel-heading">Tasks</div>
+								{# <div class="panel-body"></div> #}
+								<ul class="list-group">
+									{% for task in environment.stats_count %}
+										<li class="list-group-item">
+											<span class="badge" title="execution count">x{{task.count}}</span>
+											<span class="badge" title="average time">{{task.avg|floatformat}}s</span>
+											<a href="{{task.get_absolute_url}}">{{task.name}}</a>
+										</li>	
+									{% endfor %}
+								</ul>
+							</div>
+		        		</div>
+		        		<div class="col-md-3 col-sm-6">
+							<div class="panel panel-default">
+								<div class="panel-heading">Executions by status</div>
+								<ul class="list-group">
+									{% for status in environment.stats_statues %}
+										<li class="list-group-item">
+											<span class="badge">{{status.count}}</span>
+											{% execution_status status.status %}</li>	
+									{% endfor %}
+								</ul>
+							</div>
+		        		</div>
+		        	</div>
+        {% endfor %}
     {% endfor %}
 
 {% endblock %}
